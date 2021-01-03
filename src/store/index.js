@@ -9,7 +9,8 @@ export default new Vuex.Store({
     // = data
     products: [],
     // {id, quantity}
-    cart: []
+    cart: [],
+    checkoutStatus: null
   },
 
   getters: {
@@ -70,6 +71,18 @@ export default new Vuex.Store({
         // temporary remove a product fom the inventory
         context.commit("decrementProductInventory", product);
       }
+    },
+    checkout({ state, commit }) {
+      shop.buyProducts(
+        state.cart,
+        () => {
+          commit("emptyCart");
+          commit("setCheckoutStatus", "success");
+        },
+        () => {
+          commit("setCheckoutStatus", "fail");
+        }
+      );
     }
 
     // addToCart(context, product) {
@@ -98,6 +111,12 @@ export default new Vuex.Store({
     },
     decrementProductInventory(state, cartItem) {
       cartItem.inventory--;
+    },
+    setCheckoutStatus(state, status) {
+      state.checkoutStatus = status;
+    },
+    emptyCart(state) {
+      state.cart = [];
     }
   }
 });
