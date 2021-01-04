@@ -40,6 +40,11 @@ export default new Vuex.Store({
         (total, product) => total + product.price * product.quantity,
         0
       );
+    },
+    productIsInStock() {
+      return product => {
+        return product.inventory > 0;
+      };
     }
   },
 
@@ -55,21 +60,19 @@ export default new Vuex.Store({
       });
     },
 
-    addProductToCart(context, product) {
-      if (product.inventory > 0) {
+    addProductToCart({ state, getters, commit }, product) {
+      if (getters.productIsInStock(product)) {
         // find cartItem
-        const cartItem = context.state.cart.find(
-          item => item.id === product.id
-        );
+        const cartItem = state.cart.find(item => item.id === product.id);
         if (!cartItem) {
           //pushProductToCart
-          context.commit("pushProductToCart", product.id);
+          commit("pushProductToCart", product.id);
         } else {
           //incrementItemQuantity
-          context.commit("incrementItemQuantity", cartItem);
+          commit("incrementItemQuantity", cartItem);
         }
         // temporary remove a product fom the inventory
-        context.commit("decrementProductInventory", product);
+        commit("decrementProductInventory", product);
       }
     },
     checkout({ state, commit }) {
